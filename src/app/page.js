@@ -10,7 +10,6 @@ import GaleriaFotos from "@/components/GaleriaFotos";
 import SeccionVideo from "@/components/SeccionVideo";
 import CartaDigital from "@/components/CartaDigital";
 import ContadorTiempo from "@/components/ContadorTiempo";
-import SorpresasInteractivas from "@/components/SorpresasInteractivas";
 import BarraProgreso from "@/components/BarraProgreso";
 import AuroraFondo from "@/components/AuroraFondo";
 
@@ -36,7 +35,7 @@ export default function Home() {
 
       <main
         ref={containerRef}
-        className="h-screen overflow-y-scroll overflow-x-hidden snap-y snap-proximity scroll-smooth bg-white text-gray-900 relative"
+        className="h-[100dvh] overflow-y-scroll overflow-x-hidden snap-y snap-proximity scroll-smooth bg-[#FFF8F0] text-gray-900 relative"
       >
         <CorazonesFlotantes />
 
@@ -44,7 +43,7 @@ export default function Home() {
         <section
           id="inicio"
           ref={headerRef}
-          className="min-h-screen snap-start flex flex-col justify-center relative"
+          className="min-h-[100dvh] snap-start flex flex-col justify-center relative"
         >
           <AuroraFondo />
 
@@ -121,21 +120,21 @@ export default function Home() {
         </section>
 
         {/* SECCIÓN 2: Galería de fotos */}
-        <section id="galeria" className="min-h-screen snap-start flex flex-col justify-center">
+        <section id="galeria" className="min-h-[100dvh] snap-start flex flex-col justify-center">
           <div className="max-w-[380px] mx-auto px-4 relative z-10">
             <GaleriaFotos fotos={birthdayData.gallery} />
           </div>
         </section>
 
         {/* SECCIÓN 3: Video */}
-        <section id="video" className="min-h-screen snap-start flex flex-col justify-center">
+        <section id="video" className="min-h-[100dvh] snap-start flex flex-col justify-center">
           <div className="max-w-[380px] mx-auto px-4 relative z-10">
             <SeccionVideo datosVideo={birthdayData.video} />
           </div>
         </section>
 
         {/* SECCIÓN 4: Carta digital */}
-        <section id="carta" className="min-h-screen snap-start flex flex-col justify-center">
+        <section id="carta" className="min-h-[100dvh] snap-start flex flex-col justify-center">
           <div className="max-w-[380px] mx-auto px-4 relative z-10">
             <CartaDigital
               datosCarta={birthdayData.letter}
@@ -145,17 +144,15 @@ export default function Home() {
         </section>
 
         {/* SECCIÓN 5: Contador en vivo */}
-        <section id="contador" className="min-h-screen snap-start flex flex-col justify-center">
+        <section id="contador" className="min-h-fit py-24 snap-start flex flex-col justify-center">
           <div className="max-w-[380px] mx-auto px-4 relative z-10">
             <ContadorTiempo />
           </div>
         </section>
 
         {/* SECCIÓN 6: Sorpresas + cierre final */}
-        <section id="final" className="min-h-screen snap-start flex flex-col justify-center">
+        <section id="final" className="min-h-fit py-16 snap-start flex flex-col justify-center">
           <div className="max-w-[380px] mx-auto px-4 relative z-10 pb-16">
-            <SorpresasInteractivas sorpresas={birthdayData.surprises} />
-
             <footer className="text-center pt-8 pb-4 px-2">
               <p className="text-2xl font-carta text-[#7f1d1d]">
                 {birthdayData.finalMessage.title}

@@ -11,7 +11,10 @@ html {
 }
 
 body {
-  background-color: #ffffff;
+  /* Antes: #ffffff. Ahora coincide con el fondo base de la página (crema)
+     para que no se note como un "recuadro" distinto cuando Safari iOS
+     muestra/oculta sus barras (isla, barra inferior) durante el scroll. */
+  background-color: #FFF8F0;
   color: #1a1a1a;
 }
 

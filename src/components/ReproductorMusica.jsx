@@ -1,13 +1,148 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause, SkipBack, SkipForward, Music } from "lucide-react";
+
+// Extrae el ID de video de distintos formatos de URL de YouTube:
+// watch?v=ID, youtu.be/ID, embed/ID, con o sin parámetros extra.
+function extraerIdYoutube(url) {
+  if (!url) return null;
+  const patrones = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const patron of patrones) {
+    const match = url.match(patron);
+    if (match) return match[1];
+  }
+  return null;
+}
 
 export default function ReproductorMusica({ cancion }) {
   const [estaSonando, setEstaSonando] = useState(false);
   const [progreso, setProgreso] = useState(0);
-  const audioRef = useRef(null);
+  const [listo, setListo] = useState(false);
+
+  const audioRef = useRef(null); // fallback mp3 (si no hay youtubeUrl)
+  const playerRef = useRef(null); // instancia del player de YouTube
+  const contenedorRef = useRef(null); // <div> persistente donde se monta el player
+  const intervaloRef = useRef(null);
+
+  const youtubeId = extraerIdYoutube(cancion.youtubeUrl);
+  const usaYoutube = Boolean(youtubeId);
+
+  // Si no se especificó coverImg a mano, usamos la miniatura del propio video de YouTube.
+  const portada =
+    cancion.coverImg || (usaYoutube ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : null);
+
+  // --- Carga de la API de YouTube y creación del player ---
+  // Hecho a prueba de que React (en desarrollo, con Strict Mode) ejecute
+  // este efecto dos veces: en cada intento se limpia el contenedor y se
+  // crea un <div> hijo nuevo, en vez de depender de un id fijo que ya
+  // pudo haber sido reemplazado por un <iframe> en el intento anterior.
+  useEffect(() => {
+    if (!usaYoutube) return;
+    let cancelado = false;
+
+    const crearPlayer = () => {
+      if (cancelado || !contenedorRef.current) return;
+
+      contenedorRef.current.innerHTML = "";
+      const elementoObjetivo = document.createElement("div");
+      contenedorRef.current.appendChild(elementoObjetivo);
+
+      playerRef.current = new window.YT.Player(elementoObjetivo, {
+        videoId: youtubeId,
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          modestbranding: 1,
+          playsinline: 1,
+          rel: 0,
+        },
+        events: {
+          onReady: () => {
+            if (!cancelado) setListo(true);
+          },
+          onStateChange: (evento) => {
+            if (cancelado) return;
+            if (evento.data === window.YT.PlayerState.PLAYING) {
+              setEstaSonando(true);
+            } else if (evento.data === window.YT.PlayerState.PAUSED) {
+              setEstaSonando(false);
+            } else if (evento.data === window.YT.PlayerState.ENDED) {
+              setEstaSonando(false);
+              setProgreso(0);
+            }
+          },
+        },
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      crearPlayer();
+    } else {
+      window.__ytApiCallbacks = window.__ytApiCallbacks || [];
+      window.__ytApiCallbacks.push(crearPlayer);
+
+      if (!document.getElementById("youtube-iframe-api")) {
+        const script = document.createElement("script");
+        script.id = "youtube-iframe-api";
+        script.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(script);
+      }
+
+      if (!window.onYouTubeIframeAPIReady) {
+        window.onYouTubeIframeAPIReady = () => {
+          (window.__ytApiCallbacks || []).forEach((cb) => cb());
+          window.__ytApiCallbacks = [];
+        };
+      }
+    }
+
+    return () => {
+      cancelado = true;
+      setListo(false);
+      if (playerRef.current && playerRef.current.destroy) {
+        playerRef.current.destroy();
+      }
+      playerRef.current = null;
+      if (contenedorRef.current) contenedorRef.current.innerHTML = "";
+      if (intervaloRef.current) clearInterval(intervaloRef.current);
+    };
+  }, [youtubeId, usaYoutube]);
+
+  // --- Polling del progreso mientras suena (YouTube no emite "timeupdate") ---
+  useEffect(() => {
+    if (!usaYoutube) return;
+    if (estaSonando) {
+      intervaloRef.current = setInterval(() => {
+        const player = playerRef.current;
+        if (player && player.getCurrentTime && player.getDuration) {
+          const actual = player.getCurrentTime();
+          const total = player.getDuration() || 1;
+          setProgreso((actual / total) * 100);
+        }
+      }, 400);
+    } else if (intervaloRef.current) {
+      clearInterval(intervaloRef.current);
+    }
+    return () => {
+      if (intervaloRef.current) clearInterval(intervaloRef.current);
+    };
+  }, [estaSonando, usaYoutube]);
 
   const alternarPlay = () => {
+    if (usaYoutube) {
+      const player = playerRef.current;
+      if (!player || !listo || typeof player.playVideo !== "function") return;
+      if (estaSonando) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+      }
+      return;
+    }
+
+    // Fallback: audio mp3 local
     if (!audioRef.current) return;
     if (estaSonando) {
       audioRef.current.pause();
@@ -29,12 +164,41 @@ export default function ReproductorMusica({ cancion }) {
     const barra = e.currentTarget;
     const rect = barra.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
-    const nuevoPorcentaje = clickX / rect.width;
+    const nuevoPorcentaje = Math.min(Math.max(clickX / rect.width, 0), 1);
+
+    if (usaYoutube) {
+      if (playerRef.current && playerRef.current.getDuration) {
+        const total = playerRef.current.getDuration() || 0;
+        playerRef.current.seekTo(nuevoPorcentaje * total, true);
+        setProgreso(nuevoPorcentaje * 100);
+      }
+      return;
+    }
 
     if (audioRef.current && audioRef.current.duration) {
       audioRef.current.currentTime = nuevoPorcentaje * audioRef.current.duration;
       setProgreso(nuevoPorcentaje * 100);
     }
+  };
+
+  const retroceder = () => {
+    if (usaYoutube) {
+      if (playerRef.current && playerRef.current.seekTo) {
+        playerRef.current.seekTo(0, true);
+      }
+      return;
+    }
+    if (audioRef.current) audioRef.current.currentTime = 0;
+  };
+
+  const avanzar = () => {
+    if (usaYoutube) {
+      if (playerRef.current && playerRef.current.getCurrentTime) {
+        playerRef.current.seekTo(playerRef.current.getCurrentTime() + 10, true);
+      }
+      return;
+    }
+    if (audioRef.current) audioRef.current.currentTime += 10;
   };
 
   return (
@@ -43,9 +207,9 @@ export default function ReproductorMusica({ cancion }) {
       <div className="bg-[#111111] text-white rounded-2xl p-3.5 shadow-[0_20px_40px_-15px_rgba(127,29,29,0.35)] flex items-center gap-3">
         {/* Portada cuadrada */}
         <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-800 shrink-0 border border-neutral-700 flex items-center justify-center transition-transform duration-300 hover:scale-[1.03]">
-          {cancion.coverImg ? (
+          {portada ? (
             <img
-              src={cancion.coverImg}
+              src={portada}
               alt="Portada"
               className="w-full h-full object-cover"
             />
@@ -76,9 +240,7 @@ export default function ReproductorMusica({ cancion }) {
           {/* Botones de control */}
           <div className="flex items-center justify-center gap-6 mt-1 text-white">
             <button
-              onClick={() => {
-                if (audioRef.current) audioRef.current.currentTime = 0;
-              }}
+              onClick={retroceder}
               className="hover:opacity-75 active:scale-95 transition-all text-neutral-300"
             >
               <SkipBack size={16} fill="currentColor" />
@@ -96,9 +258,7 @@ export default function ReproductorMusica({ cancion }) {
             </button>
 
             <button
-              onClick={() => {
-                if (audioRef.current) audioRef.current.currentTime += 10;
-              }}
+              onClick={avanzar}
               className="hover:opacity-75 active:scale-95 transition-all text-neutral-300"
             >
               <SkipForward size={16} fill="currentColor" />
@@ -107,16 +267,27 @@ export default function ReproductorMusica({ cancion }) {
         </div>
       </div>
 
-      <p className="text-[11px] text-gray-500 text-center mt-2 italic">
-        (Click al play)
-      </p>
+      {/* Player de YouTube oculto: solo se usa como motor de audio */}
+      {usaYoutube && (
+        <div
+          ref={contenedorRef}
+          className="absolute w-px h-px overflow-hidden opacity-0 pointer-events-none"
+          aria-hidden="true"
+        />
+      )}
 
-      <audio
-        ref={audioRef}
-        src={cancion.audioSrc}
-        onTimeUpdate={actualizarProgreso}
-        onEnded={() => setEstaSonando(false)}
-      />
+      {/* Fallback: audio mp3 local si no se cargó youtubeUrl */}
+      {!usaYoutube && (
+        <audio
+          ref={audioRef}
+          src={cancion.audioSrc}
+          onTimeUpdate={actualizarProgreso}
+          onEnded={() => {
+            setEstaSonando(false);
+            setProgreso(0);
+          }}
+        />
+      )}
     </div>
   );
 }
