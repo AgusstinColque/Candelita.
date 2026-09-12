@@ -15,7 +15,6 @@ body {
   color: #1a1a1a;
 }
 
-/* Letra de carta cursiva idéntica a la foto */
 .font-carta {
   font-family: var(--font-cursive), cursive;
 }

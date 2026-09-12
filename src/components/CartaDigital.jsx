@@ -3,7 +3,7 @@
 export default function CartaDigital({ datosCarta, remitente }) {
   return (
     <section className="my-10 px-4 max-w-sm mx-auto">
-      <div className="relative bg-[#FFFDF9] rounded-3xl p-6 shadow-md border border-rose-200/60 overflow-hidden">
+      <div className="relative bg-[#FFFDF9] rounded-3xl p-6 shadow-[0_20px_40px_-15px_rgba(127,29,29,0.25)] border border-rose-200/60 overflow-hidden">
         {/* Detalle sutil de sello o sobre arriba */}
         <div className="text-center mb-5">
           <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-rose-100 text-rose-500 mb-2 shadow-inner">

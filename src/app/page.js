@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { birthdayData } from "@/data/content";
 
 import CorazonesFlotantes from "@/components/CorazonesFlotantes";
@@ -9,26 +9,34 @@ import ReproductorMusica from "@/components/ReproductorMusica";
 import GaleriaFotos from "@/components/GaleriaFotos";
 import SeccionVideo from "@/components/SeccionVideo";
 import CartaDigital from "@/components/CartaDigital";
+import ContadorTiempo from "@/components/ContadorTiempo";
 import SorpresasInteractivas from "@/components/SorpresasInteractivas";
 import BarraProgreso from "@/components/BarraProgreso";
 
 export default function Home() {
   const [abierta, setAbierta] = useState(false);
   const containerRef = useRef(null);
+  const headerRef = useRef(null);
+
+  const { scrollYProgress } = useScroll({
+    target: headerRef,
+    container: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const headerScale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
 
   return (
     <>
-      {/* Barra de progreso fija arriba de todo */}
       <BarraProgreso containerRef={containerRef} />
 
       <main
         ref={containerRef}
-        className="h-screen overflow-y-scroll overflow-x-hidden snap-y snap-mandatory scroll-smooth bg-white text-gray-900 relative"
+        className="h-screen overflow-y-scroll overflow-x-hidden snap-y snap-proximity scroll-smooth bg-white text-gray-900 relative"
       >
-        {/* Corazones sutiles flotando de fondo */}
         <CorazonesFlotantes />
 
-        {/* Pantalla sorpresa al inicio (overlay, no ocupa snap) */}
         <AnimatePresence>
           {!abierta && (
             <PantallaBienvenida
@@ -39,10 +47,17 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* SECCIÓN 1: Encabezado + Reproductor */}
-        <section id="inicio" className="min-h-screen snap-start flex flex-col justify-center">
+        {/* SECCIÓN 1: Encabezado (con parallax) + Reproductor (fijo) */}
+        <section
+          id="inicio"
+          ref={headerRef}
+          className="min-h-screen snap-start flex flex-col justify-center"
+        >
           <div className="max-w-[380px] mx-auto px-4 relative z-10">
-            <header className="text-center pt-2 pb-1 relative">
+            <motion.header
+              style={{ scale: headerScale, opacity: headerOpacity }}
+              className="text-center pt-2 pb-1 relative"
+            >
               <div className="flex justify-start pl-2 mb-1">
                 <svg width="44" height="32" viewBox="0 0 50 35" fill="none">
                   <path
@@ -81,7 +96,7 @@ export default function Home() {
                 <p>El sonido de todo lo que siento por vos...</p>
                 <p>La canción que me hace pensarte siempre.</p>
               </div>
-            </header>
+            </motion.header>
 
             <ReproductorMusica cancion={birthdayData.music} />
           </div>
@@ -111,7 +126,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECCIÓN 5: Sorpresas + cierre final */}
+        {/* SECCIÓN 5: Contador en vivo */}
+        <section id="contador" className="min-h-screen snap-start flex flex-col justify-center">
+          <div className="max-w-[380px] mx-auto px-4 relative z-10">
+            <ContadorTiempo />
+          </div>
+        </section>
+
+        {/* SECCIÓN 6: Sorpresas + cierre final */}
         <section id="final" className="min-h-screen snap-start flex flex-col justify-center">
           <div className="max-w-[380px] mx-auto px-4 relative z-10 pb-16">
             <SorpresasInteractivas sorpresas={birthdayData.surprises} />

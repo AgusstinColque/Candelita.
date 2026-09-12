@@ -40,9 +40,9 @@ export default function ReproductorMusica({ cancion }) {
   return (
     <div className="w-full max-w-[340px] mx-auto my-6">
       {/* Caja negra con bordes curvos igual a la imagen */}
-      <div className="bg-[#111111] text-white rounded-2xl p-3.5 shadow-xl flex items-center gap-3">
+      <div className="bg-[#111111] text-white rounded-2xl p-3.5 shadow-[0_20px_40px_-15px_rgba(127,29,29,0.35)] flex items-center gap-3">
         {/* Portada cuadrada */}
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-800 shrink-0 border border-neutral-700 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-800 shrink-0 border border-neutral-700 flex items-center justify-center transition-transform duration-300 hover:scale-[1.03]">
           {cancion.coverImg ? (
             <img
               src={cancion.coverImg}
@@ -86,7 +86,7 @@ export default function ReproductorMusica({ cancion }) {
 
             <button
               onClick={alternarPlay}
-              className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow"
+              className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_8px_16px_-4px_rgba(127,29,29,0.4)]"
             >
               {estaSonando ? (
                 <Pause size={15} fill="black" />
