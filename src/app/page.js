@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { birthdayData } from "@/data/content";
 
+import Preloader from "@/components/Preloader";
 import CorazonesFlotantes from "@/components/CorazonesFlotantes";
 import PantallaBienvenida from "@/components/PantallaBienvenida";
 import ReproductorMusica from "@/components/ReproductorMusica";
@@ -15,6 +16,7 @@ import BarraProgreso from "@/components/BarraProgreso";
 import AuroraFondo from "@/components/AuroraFondo";
 
 export default function Home() {
+  const [cargando, setCargando] = useState(true);
   const [abierta, setAbierta] = useState(false);
   const containerRef = useRef(null);
   const headerRef = useRef(null);
@@ -30,6 +32,8 @@ export default function Home() {
 
   return (
     <>
+      {cargando && <Preloader onFinish={() => setCargando(false)} />}
+
       <BarraProgreso containerRef={containerRef} />
 
       <main

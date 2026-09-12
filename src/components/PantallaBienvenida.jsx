@@ -1,16 +1,21 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 
 export default function PantallaBienvenida({ alAbrir, nombre, datosBienvenida }) {
+  const [abriendo, setAbriendo] = useState(false);
+
   const manejarApertura = () => {
+    if (abriendo) return;
+    setAbriendo(true);
     confetti({
       particleCount: 100,
       spread: 80,
       origin: { y: 0.6 },
       colors: ["#7f1d1d", "#be123c", "#f5b942", "#fef3c7", "#ffffff"],
     });
-    alAbrir();
+    setTimeout(() => alAbrir(), 500);
   };
 
   const globos = [
@@ -26,7 +31,6 @@ export default function PantallaBienvenida({ alAbrir, nombre, datosBienvenida })
       transition={{ duration: 0.7, ease: "easeInOut" }}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-[#FFF8F0] via-[#FFF3E0] to-[#FFE8EC] px-6 text-center overflow-hidden"
     >
-      {/* Globos flotando de fondo, decorativos */}
       {globos.map((globo, i) => (
         <motion.div
           key={i}
@@ -52,16 +56,31 @@ export default function PantallaBienvenida({ alAbrir, nombre, datosBienvenida })
         🎉 {datosBienvenida.badge}
       </motion.span>
 
+      {/* Ilustración SVG del regalo, con tapa animada */}
       <motion.div
-        animate={{
-          scale: [1, 1.1, 1],
-          rotate: [0, -4, 4, 0],
-        }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-        className="text-7xl mb-6 cursor-pointer drop-shadow-md select-none active:scale-95 transition-transform"
+        animate={!abriendo ? { y: [0, -8, 0] } : {}}
+        transition={{ duration: 2.2, repeat: abriendo ? 0 : Infinity, ease: "easeInOut" }}
+        className="cursor-pointer mb-6 select-none"
         onClick={manejarApertura}
       >
-        🎁
+        <svg width="110" height="110" viewBox="0 0 120 120" fill="none">
+          {/* Caja base */}
+          <rect x="25" y="55" width="70" height="50" rx="5" fill="#7f1d1d" />
+          <rect x="53" y="55" width="14" height="50" fill="#f5b942" />
+
+          {/* Tapa: se levanta y rota al abrir */}
+          <motion.g
+            animate={abriendo ? { y: -38, rotate: -22 } : { y: 0, rotate: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{ transformOrigin: "22px 58px" }}
+          >
+            <rect x="18" y="42" width="84" height="18" rx="4" fill="#921f1f" />
+            <rect x="53" y="42" width="14" height="18" fill="#fbbf24" />
+            <ellipse cx="48" cy="38" rx="10" ry="7" fill="#fbbf24" transform="rotate(-20 48 38)" />
+            <ellipse cx="72" cy="38" rx="10" ry="7" fill="#fbbf24" transform="rotate(20 72 38)" />
+            <circle cx="60" cy="40" r="5" fill="#f59e0b" />
+          </motion.g>
+        </svg>
       </motion.div>
 
       <motion.h1
