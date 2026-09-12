@@ -167,3 +167,18 @@ export default function Home() {
             <footer className="text-center pt-8 pb-4 px-2">
               <p className="text-2xl font-carta text-[#7f1d1d]">
                 {birthdayData.finalMessage.title}
+              </p>
+              <p className="text-xs text-gray-500 font-editorial mt-1 italic">
+                {birthdayData.finalMessage.subtext}
+              </p>
+              <div className="w-12 h-0.5 bg-rose-200 mx-auto my-4 rounded-full" />
+              <p className="text-[11px] text-gray-400 tracking-wide">
+                {birthdayData.finalMessage.footer}
+              </p>
+            </footer>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}
