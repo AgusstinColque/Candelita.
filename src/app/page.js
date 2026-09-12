@@ -12,6 +12,7 @@ import CartaDigital from "@/components/CartaDigital";
 import ContadorTiempo from "@/components/ContadorTiempo";
 import SorpresasInteractivas from "@/components/SorpresasInteractivas";
 import BarraProgreso from "@/components/BarraProgreso";
+import AuroraFondo from "@/components/AuroraFondo";
 
 export default function Home() {
   const [abierta, setAbierta] = useState(false);
@@ -47,12 +48,14 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* SECCIÓN 1: Encabezado (con parallax) + Reproductor (fijo) */}
+        {/* SECCIÓN 1: Encabezado (con parallax + aurora + texto animado) */}
         <section
           id="inicio"
           ref={headerRef}
-          className="min-h-screen snap-start flex flex-col justify-center"
+          className="min-h-screen snap-start flex flex-col justify-center relative"
         >
+          <AuroraFondo />
+
           <div className="max-w-[380px] mx-auto px-4 relative z-10">
             <motion.header
               style={{ scale: headerScale, opacity: headerOpacity }}
@@ -84,18 +87,41 @@ export default function Home() {
                 Para la cumpleañera más linda
               </p>
 
-              <h1 className="text-5xl sm:text-6xl text-[#7f1d1d] font-carta leading-tight my-1 select-none">
-                Feliz Cumpleaños
+              <h1 className="text-5xl sm:text-6xl text-[#7f1d1d] font-carta leading-tight my-1 select-none flex flex-wrap justify-center">
+                {"Feliz Cumpleaños".split("").map((letra, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 0.4, delay: 0.3 + i * 0.035 }}
+                  >
+                    {letra === " " ? "\u00A0" : letra}
+                  </motion.span>
+                ))}
               </h1>
 
-              <p className="text-3xl text-gray-800 font-carta mt-0.5">
-                {birthdayData.girlfriendName}
+              <p className="text-3xl text-gray-800 font-carta mt-0.5 flex flex-wrap justify-center">
+                {birthdayData.girlfriendName.split("").map((letra, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0, y: 15, filter: "blur(3px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    transition={{ duration: 0.35, delay: 1 + i * 0.05 }}
+                  >
+                    {letra === " " ? "\u00A0" : letra}
+                  </motion.span>
+                ))}
               </p>
 
-              <div className="my-5 text-gray-600 font-editorial italic text-xs sm:text-sm space-y-1">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.6, duration: 0.6 }}
+                className="my-5 text-gray-600 font-editorial italic text-xs sm:text-sm space-y-1"
+              >
                 <p>El sonido de todo lo que siento por vos...</p>
                 <p>La canción que me hace pensarte siempre.</p>
-              </div>
+              </motion.div>
             </motion.header>
 
             <ReproductorMusica cancion={birthdayData.music} />
@@ -141,18 +167,3 @@ export default function Home() {
             <footer className="text-center pt-8 pb-4 px-2">
               <p className="text-2xl font-carta text-[#7f1d1d]">
                 {birthdayData.finalMessage.title}
-              </p>
-              <p className="text-xs text-gray-500 font-editorial mt-1 italic">
-                {birthdayData.finalMessage.subtext}
-              </p>
-              <div className="w-12 h-0.5 bg-rose-200 mx-auto my-4 rounded-full" />
-              <p className="text-[11px] text-gray-400 tracking-wide">
-                {birthdayData.finalMessage.footer}
-              </p>
-            </footer>
-          </div>
-        </section>
-      </main>
-    </>
-  );
-}
