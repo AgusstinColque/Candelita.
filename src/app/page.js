@@ -1,11 +1,10 @@
 "use client";
 import { useState, useRef } from "react";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { birthdayData } from "@/data/content";
 
 import Preloader from "@/components/Preloader";
 import CorazonesFlotantes from "@/components/CorazonesFlotantes";
-import PantallaBienvenida from "@/components/PantallaBienvenida";
 import ReproductorMusica from "@/components/ReproductorMusica";
 import GaleriaFotos from "@/components/GaleriaFotos";
 import SeccionVideo from "@/components/SeccionVideo";
@@ -17,7 +16,6 @@ import AuroraFondo from "@/components/AuroraFondo";
 
 export default function Home() {
   const [cargando, setCargando] = useState(true);
-  const [abierta, setAbierta] = useState(false);
   const containerRef = useRef(null);
   const headerRef = useRef(null);
 
@@ -41,16 +39,6 @@ export default function Home() {
         className="h-screen overflow-y-scroll overflow-x-hidden snap-y snap-proximity scroll-smooth bg-white text-gray-900 relative"
       >
         <CorazonesFlotantes />
-
-        <AnimatePresence>
-          {!abierta && (
-            <PantallaBienvenida
-              nombre={birthdayData.girlfriendName}
-              datosBienvenida={birthdayData.welcome}
-              alAbrir={() => setAbierta(true)}
-            />
-          )}
-        </AnimatePresence>
 
         {/* SECCIÓN 1: Encabezado (con parallax + aurora + texto animado) */}
         <section
