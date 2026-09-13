@@ -110,8 +110,8 @@ export default function Home() {
                 transition={{ delay: 1.6, duration: 0.6 }}
                 className="my-5 text-gray-600 font-editorial italic text-xs sm:text-sm space-y-1"
               >
-                <p>El sonido de todo lo que siento por vos...</p>
-                <p>La canción que me hace pensarte siempre.</p>
+                <p>Asumo esta cancion te hace recordar un momento especial...</p>
+                
               </motion.div>
             </motion.header>
 
