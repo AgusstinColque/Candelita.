@@ -12,7 +12,7 @@ export default function BarraProgreso({ containerRef }) {
     <motion.div
       className="fixed left-0 right-0 h-[3px] bg-[#7f1d1d] origin-left z-50 pointer-events-none"
       style={{
-        top: "env(safe-area-inset-top, 0px)",
+        bottom: "env(safe-area-inset-bottom, 0px)",
         scaleX: scrollYProgress,
       }}
     />
